@@ -1,0 +1,85 @@
+
+
+{{!-- Content-Type: multipart/alternative; boundary="signin-otp"
+
+--signin-otp
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+
+Bonjour,Pour finaliser votre connexion, veuillez utiliser le code suivant :
+{{otp}}. Ce code est valable pendant 10 minutes. Si vous ne l'avez pas demandé, veuillez ignorer ce message.
+
+--signin-otp
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: 7bit --}}
+
+<html lang="fr">
+
+<head>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .email-box {
+            background-color: #ffffff;
+            border-radius: 10px;
+            max-width: 600px;
+            margin: 30px auto;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+        }
+
+        h1 {
+            color: #2e2e2e;
+            font-size: 24px;
+        }
+
+        .otp-code {
+            font-size: 36px;
+            font-weight: bold;
+            color: #0073e6;
+            margin: 20px 0;
+        }
+
+        .footer {
+            font-size: 12px;
+            color: #777777;
+            text-align: center;
+            padding-top: 30px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="email-box">
+            <h1>Votre code OTP</h1>
+            <p>Bonjour,</p>
+            <p>Pour finaliser votre connexion, veuillez utiliser le code suivant :</p>
+            <div class="otp-code">
+                {{otp}} 
+            </div>
+            <p>Ce code est valable pendant 10 minutes. Si vous ne l'avez pas demandé, veuillez ignorer ce message.</p>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2024 Billifier. Tous droits réservés.</p>
+            <p>Si vous avez des questions, n'hésitez pas à <a href="mailto:support@votreentreprise.com">nous
+                    contacter</a>.</p>
+        </div>
+    </div>
+</body>
+
+</html>
+{{!-- --signin-otp --}}

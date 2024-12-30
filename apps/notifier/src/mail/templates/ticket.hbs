@@ -1,0 +1,121 @@
+<html lang='en'>
+
+<head>
+    <meta charset='UTF-8' />
+    <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>Vo{{#if isMulti }}s{{else}}tre{{/if}} ticket{{#if isMulti }}s{{/if}} pour </title>
+    <style>
+        body {
+            width: 100%;
+            max-width: 600px;
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        header {
+            color: #000;
+            text-align: center;
+        }
+
+        main {
+            width: 100%;
+            padding-block: 25px;
+        }
+
+        main h3 {
+            margin-left: 25px;
+        }
+
+        main p {
+            width: calc(100% - 50px);
+            margin: 25px auto;
+            line-height: 1.6;
+        }
+
+        .username {
+            color: #510E63;
+            font-weight: bold;
+        }
+
+        a {
+            font-weight: bold;
+        }
+
+        .em-link,
+        .vs-link {
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        footer {
+            width: 100%;
+            background-color: #f2f2f2;
+            padding: 10px;
+            text-align: center;
+        }
+
+        img {
+            border-radius: 15px;
+            width: 100%;
+            object-fit: ;
+        }
+
+        .header-banner {
+            width: inherit;
+            max-width: inherit;
+        }
+    </style>
+</head>
+
+<body>
+    <div class='container'>
+        <header>
+            <h1>Vo{{#if isMulti }}s{{else}}tre{{/if}} ticket{{#if isMulti }}s{{/if}} pour </h1>
+
+        </header>
+        <main>
+            <h3>Bonjour <span class="username">{{ name }}</span>,</h3>
+
+           
+                Comment participer à l’évènement ?<br>
+            <ol>
+                <li>
+                    <b>Téléchargez votre ticket</b> : Téléchargez le billet joint à cet e-mail et conservez-le sur votre
+                    smartphone ou imprimez-le.
+                </li>
+                <li>
+                    <b>Présentez votre ticket le jour de l'événement</b> : Présentez votre ticket à l'entrée pour qu'il
+                    soit scanné.
+                </li>
+                <li>
+                    <b>Profitez de l'événement</b> : Une fois votre ticket scanné, vous pourrez accéder à la salle et
+                    profiter pleinement de l'événement.
+                </li>
+            </ol>
+            </p>
+
+            <p>
+                Si vous avez des questions ou des préoccupations, n'hésitez pas à nous contacter par téléphone au <a
+                    href="tel:01 91 46 19 19">01 91 46 19 19</a> ou par e-mail
+                <a href="mailto:adac.sa@gouv.bj">adac.sa@gouv.bj</a>
+            </p>
+
+            <p>
+                Cordialement,<br>
+                L'équipe “ NACC ”.
+            </p>
+        </main>
+
+    </div>
+</body>
+
+</html>

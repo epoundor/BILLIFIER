@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/billifier/src",
+  "monorepo": true,
+  "root": "apps/billifier",
+  "compilerOptions": {
+    "deleteOutDir": true,
+    "watchAssets": true,
+    "assets": [
+      "**/*.hbs"
+    ],
+    "webpack": true,
+    "tsConfigPath": "apps/billifier/tsconfig.app.json"
+  },
+  "projects": {
+    "billifier": {
+      "type": "application",
+      "root": "apps/billifier",
+      "entryFile": "main",
+      "sourceRoot": "apps/billifier/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/billifier/tsconfig.app.json"
+      }
+    },
+    "order-queue": {
+      "type": "application",
+      "root": "apps/order-queue",
+      "entryFile": "main",
+      "sourceRoot": "apps/order-queue/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/order-queue/tsconfig.app.json"
+      }
+    },
+    "notifier": {
+      "type": "application",
+      "root": "apps/notifier",
+      "entryFile": "main",
+      "sourceRoot": "apps/notifier/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/notifier/tsconfig.app.json"
+      }
+    },
+    "types": {
+      "type": "library",
+      "root": "libs/types",
+      "entryFile": "index",
+      "sourceRoot": "libs/types/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/types/tsconfig.lib.json"
+      }
+    },
+    "file": {
+      "type": "library",
+      "root": "libs/file",
+      "entryFile": "index",
+      "sourceRoot": "libs/file/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/file/tsconfig.lib.json"
+      }
+    }
+  }
+}

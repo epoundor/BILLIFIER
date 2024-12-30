@@ -1,0 +1,222 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String  @id @default(cuid())
+  name          String
+  email         String  @unique
+  phone         String?
+  emailVerified Boolean @default(false)
+  password      String?
+  otp           Otp[]
+
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @default(now())
+  event              Event[]
+  eventStatusHistory EventStatusHistory[]
+  ticketTemplate     TicketTemplate[]
+  payment            Payment[]
+  ticketOrder        TicketOrder[]
+}
+
+enum OtpType {
+  LOGIN
+  PASSWORD_
+  RESET
+  REGISTER
+}
+
+model Otp {
+  id        String   @id @default(cuid())
+  code      String
+  expiredAt DateTime
+  usedAt    String?
+  isUsed    Boolean  @default(false)
+  userId    String
+
+  user User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type OtpType
+
+  createdAt DateTime @default(now())
+}
+
+enum EventType {
+  LIVE
+  ONLINE
+}
+
+enum EventStatus {
+  DRAFTED
+  PUBLISHED
+  ARCHIVED
+}
+
+model EventStatusHistory {
+  id String @id @default(cuid())
+
+  userId    String
+  createdBy User   @relation(fields: [userId], references: [id])
+
+  status EventStatus
+  event  Event       @relation(fields: [eventId], references: [id])
+
+  createdAt DateTime @default(now())
+  eventId   String
+}
+
+model Event {
+  id           String      @id @default(cuid())
+  title        String
+  description  String
+  coverUrl     String
+  startingDate DateTime
+  endingDate   DateTime
+  mapUrl       String?
+  type         EventType   @default(LIVE)
+  ticketCount  Int         @default(0)
+  status       EventStatus @default(DRAFTED)
+
+  hostId String
+  host   User   @relation(fields: [hostId], references: [id])
+
+  tickets            Ticket[]
+  eventStatusHistory EventStatusHistory[]
+  payment            Payment[]
+
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @default(now())
+  UserTicket UserTicket[]
+}
+
+enum TicketType {
+  NORMAL
+  GUEST
+}
+
+model Ticket {
+  id          String     @id @default(cuid())
+  price       Int        @default(0)
+  title       String
+  description String
+  capacity    Int
+  total       Int
+  type        TicketType @default(NORMAL)
+
+  ticketTemplate   TicketTemplate? @relation(fields: [ticketTemplateId], references: [id])
+  ticketTemplateId String?
+  event            Event?          @relation(fields: [eventId], references: [id])
+  eventId          String?
+  payment          Payment[]
+  orders           TicketOrder[]
+
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @default(now())
+  userTicket UserTicket[]
+}
+
+model TicketTemplate {
+  id              String  @id @default(cuid())
+  name            String  @unique
+  backgroundImage String?
+  qrCodeSetting   Float[] @default([0, 0, 0, 0])
+  metadata        Json?
+
+  tickets Ticket[]
+  user    User     @relation(fields: [userId], references: [id])
+  userId  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+enum TicketOrderStatus {
+  INIT
+  REFUND
+  PAID
+}
+
+enum UserTicketStatus {
+  UNVERIFIED
+  VERIFIED
+  REVOKED
+}
+
+model UserTicket {
+  id   String @id @default(cuid())
+  code String @unique
+
+  status      UserTicketStatus @default(UNVERIFIED)
+  ticket      Ticket           @relation(fields: [ticketId], references: [id])
+  ticketId    String
+  event       Event            @relation(fields: [eventId], references: [id])
+  ticketOrder TicketOrder      @relation(fields: [ticketOrderId], references: [id])
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  eventId       String
+  ticketOrderId String
+}
+
+model TicketOrder {
+  id String @id @default(cuid())
+
+  amount           Int
+  paymentReference String?
+  paymentProvider  PaymentProvider
+  status           TicketOrderStatus @default(INIT)
+  buyer            User?             @relation(fields: [buyerId], references: [id])
+  buyerId          String?
+  ticket           Ticket            @relation(fields: [ticketId], references: [id])
+  ticketId         String
+  quantity         Int               @default(1)
+
+  userTickets UserTicket[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum PaymentProvider {
+  CASH
+  KKIAPAY
+  FEDAPAY
+  STRIPE
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+model Payment {
+  id                String          @id @default(cuid())
+  provider          PaymentProvider
+  providerReference String?
+  status            PaymentStatus
+  amount            Float
+  url               String
+
+  payerId  String
+  payer    User    @relation(fields: [payerId], references: [id])
+  event    Event?  @relation(fields: [eventId], references: [id])
+  eventId  String?
+  ticket   Ticket? @relation(fields: [ticketId], references: [id])
+  ticketId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
