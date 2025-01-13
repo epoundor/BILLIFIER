@@ -5,28 +5,18 @@ import {
   InternalServerErrorException,
   Logger,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
 import { PrismaService } from '../../../../order-queue/src/prisma/prisma.service';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
-import { GetEventsDto, ReserveDto } from './dto';
-import { BasePaginationQueryDto } from 'apps/billifier/src/dtos/base-paginate';
-import { Prisma } from '@prisma/client';
-import { PaginatedResponse } from 'apps/billifier/src/types';
-import { EventEntity } from './entities';
-import { PER_PAGE } from 'apps/billifier/src/constants';
+import { ReserveDto } from './dto';
 import { CreateTicketDto } from '../tickets/dto';
 import { ProducerService } from '../queue/producer.service';
 
 @Injectable()
 export class EventsService {
   private readonly logger: Logger = new Logger(EventsService.name);
-
-  private defaultInclude: Prisma.EventInclude = {
-    host: true,
-  };
 
   constructor(
     @Inject(REQUEST) private readonly request: Request,
@@ -48,40 +38,6 @@ export class EventsService {
         hostId,
       },
     });
-  }
-
-  async findAll(query: GetEventsDto) {
-    const condition: Prisma.EventWhereInput = {
-      status: {
-        not: 'ARCHIVED',
-      },
-    };
-
-    return await this.paginateEventsResponse(condition, query);
-  }
-
-  async findOne(id: string) {
-    const findedEvent = await this.prisma.event.findUnique({
-      include: {
-        tickets: true,
-        host: {
-          select: {
-            id: true,
-            email: true,
-            name: true,
-          },
-        },
-      },
-      where: {
-        id,
-        status: {
-          not: 'ARCHIVED',
-        },
-      },
-    });
-
-    if (!findedEvent) throw new NotFoundException();
-    return findedEvent;
   }
 
   async archive(id: string) {
@@ -165,62 +121,6 @@ export class EventsService {
     }
   }
 
-  async paginateEventsResponse<T extends BasePaginationQueryDto = GetEventsDto>(
-    condition: Prisma.EventWhereInput,
-    paginationOptions: T = {} as T,
-    include: Prisma.EventInclude = this.defaultInclude,
-    orderBy: Prisma.EventFindManyArgs['orderBy'] = [],
-  ): Promise<PaginatedResponse<EventEntity>> {
-    const prismaTake = paginationOptions.take ?? PER_PAGE;
-    const prismaSkip = paginationOptions.page
-      ? (paginationOptions.page - 1) * prismaTake
-      : (paginationOptions.skip ?? 0);
-
-    const paginationPayload: Pick<
-      Prisma.EventFindManyArgs,
-      'take' | 'skip' | 'orderBy'
-    > = {
-      take: prismaTake,
-      skip: prismaSkip,
-      orderBy: [
-        ...(Array.isArray(orderBy) ? orderBy : [orderBy]),
-        paginationOptions.sortBy && paginationOptions.sortOrder
-          ? { [paginationOptions.sortBy]: paginationOptions.sortOrder }
-          : {},
-      ],
-    };
-
-    const [total, events] = await this.prisma.$transaction([
-      this.prisma.event.count({ where: condition }),
-      this.prisma.event.findMany({
-        where: condition,
-        ...paginationPayload,
-        include: {
-          ...this.defaultInclude,
-          ...include,
-        },
-      }),
-    ]);
-
-    return {
-      data: events,
-      total,
-    };
-  }
-
-  async getTickets(id: string) {
-    return this.prisma.ticket.findMany({
-      where: {
-        event: {
-          status: {
-            not: 'ARCHIVED',
-          },
-          id,
-        },
-      },
-    });
-  }
-
   async createTicket(id: string, createTicketDto: CreateTicketDto) {
     const hostId = this.request.user.sub;
     const event = await this.prisma.event.findUniqueOrThrow({
@@ -261,6 +161,7 @@ export class EventsService {
         eventId: id,
       },
     });
+    // Placed registration
     const order = await this.prisma.ticketOrder.create({
       data: {
         amount: dto.quantity * ticket.price,
@@ -271,7 +172,7 @@ export class EventsService {
             : 'INIT',
         ticketId,
         buyerId,
-        quantity: dto.quantity
+        quantity: dto.quantity,
       },
       include: {
         buyer: {
@@ -283,22 +184,22 @@ export class EventsService {
       },
     });
 
-    if (order.status === 'PAID') {
-      const allTickets = [];
-      for (let index = 0; index < order.quantity; index++) {
-        allTickets.push({
-          code: this.generateRandomCode(6),
-          ticketId: order.ticketId,
-          ticketOrderId: order.id,
-          eventId: id,
-        });
-      }
-      await this.prisma.userTicket.createMany({
-        data: allTickets,
-      });
-      this.logger.log('Sending to queue');
-      await this.producer.sendTicketToBuyer(order.buyer.email, order);
-    }
+    // if (order.status === 'PAID') {
+    //   const allTickets = [];
+    //   for (let index = 0; index < order.quantity; index++) {
+    //     allTickets.push({
+    //       code: this.generateRandomCode(6),
+    //       ticketId: order.ticketId,
+    //       ticketOrderId: order.id,
+    //       eventId: id,
+    //     });
+    //   }
+    //   await this.prisma.userTicket.createMany({
+    //     data: allTickets,
+    //   });
+    //   this.logger.log('Sending to queue');
+    //   await this.producer.sendTicketToBuyer(order.buyer.email, order);
+    // }
 
     return order;
   }

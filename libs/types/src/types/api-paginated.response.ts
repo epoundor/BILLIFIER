@@ -1,4 +1,4 @@
 export type PaginatedResponse<T> = {
-    data: T[];
-    total: number;
+  data: T[];
+  total: number;
 };

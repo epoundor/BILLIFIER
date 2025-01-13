@@ -58,6 +58,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/file/tsconfig.lib.json"
       }
+    },
+    "read-event-service": {
+      "type": "application",
+      "root": "apps/read-event-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/read-event-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/read-event-service/tsconfig.app.json"
+      }
     }
   }
 }

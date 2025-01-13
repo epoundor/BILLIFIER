@@ -1,6 +1,5 @@
 import {
   Controller,
-  Get,
   Post,
   Body,
   Patch,
@@ -11,9 +10,8 @@ import {
 } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { ApiCookieAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { GetUser, SkipAuth } from '../../../src/decorators';
-import { EventEntity } from './entities';
-import { CreateEventDto, GetEventsDto, ReserveDto } from './dto';
+import { EventEntity, TickerOrderEntity } from './entities';
+import { CreateEventDto, ReserveDto } from './dto';
 import { TicketEntity } from '../tickets/entities';
 import { CreateTicketDto } from '../tickets/dto';
 
@@ -27,18 +25,6 @@ export class EventsController {
   @ApiOkResponse({ type: EventEntity })
   create(@Body() createEventDto: CreateEventDto) {
     return this.eventsService.create(createEventDto);
-  }
-
-  @SkipAuth()
-  @Get()
-  findAll(@Query() query: GetEventsDto) {
-    return this.eventsService.findAll(query);
-  }
-
-  @SkipAuth()
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.eventsService.findOne(id);
   }
 
   @Patch(':id/archive')
@@ -61,19 +47,12 @@ export class EventsController {
   }
 
   @Post(':id/tickets/:ticketId/reserve')
-  // @ApiOkResponse({ type: TicketEntity })
+  @ApiOkResponse({ type: TickerOrderEntity })
   reserve(
     @Body() reserveDto: ReserveDto,
     @Param('id') id: string,
     @Param('ticketId') ticketId: string,
   ) {
     return this.eventsService.reserve(id, ticketId, reserveDto);
-  }
-
-  @Get(':id/tickets')
-  @SkipAuth()
-  @ApiOkResponse({ type: EventEntity })
-  getEventTicket(@Param('id') id: string) {
-    return this.eventsService.getTickets(id);
   }
 }
